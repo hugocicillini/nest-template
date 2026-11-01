@@ -34,7 +34,7 @@
     "@bull-board/api": "^8.4.0",
     "@bull-board/express": "^8.4.0",
     "@bull-board/nestjs": "^8.4.0",
-    "@keyv/redis": "^5.1.6",
+    "@keyv/redis": "^6.1.0",
     "@nest-lab/throttler-storage-redis": "^1.2.0",
     "@nestjs/bull-shared": "^11.0.4",
     "@nestjs/bullmq": "^11.0.4",
