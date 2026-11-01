@@ -1,0 +1,32 @@
+model User {
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  passwordHash     String
+  active           Boolean   @default(true)
+  emailVerifiedAt  DateTime?
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  createdBy        String?
+  updatedBy        String?
+
+  createdByUser User? @relation("UserCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByUser User? @relation("UserUpdatedBy", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  roles                   UserRole[]
+  refreshTokens           RefreshToken[]
+  notifications           Notification[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  uploadedFiles           FileAsset[]
+  auditLogs               AuditLog[]
+  createdUsers            User[]                   @relation("UserCreatedBy")
+  updatedUsers            User[]                   @relation("UserUpdatedBy")
+
+  @@index([deletedAt])
+  @@index([createdBy])
+  @@index([updatedBy])
+  @@map("users")
+}

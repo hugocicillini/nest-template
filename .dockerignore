@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.git
+.github
+.husky
+.claude
+test
+uploads
+.env
+.env.*
+!.env.example
+*.md
+npm-debug.log*

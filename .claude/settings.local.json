@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf dist *.tsbuildinfo)",
+      "Bash(npm run *)",
+      "Bash(timeout 8 node dist/main.js)",
+      "Bash(timeout 3 bash -c \"</dev/tcp/localhost/51214\")",
+      "Bash(find \"C:\\\\Users\\\\hugo.oliveira\\\\AppData\\\\Local\\\\prisma-dev-nodejs\\\\Data\\\\default\\\\.lock\" -maxdepth 2 2>&1)",
+      "Bash(awk '{print $NF}')",
+      "Bash(read pid *)",
+      "Bash(powershell -Command 'Stop-Process -Id __TRACKED_VAR__ -Force')",
+      "Bash(cat \"C:\\\\Users\\\\hugo.oliveira\\\\AppData\\\\Local\\\\prisma-dev-nodejs\\\\Data\\\\default\\\\server.json\" 2>&1 *)",
+      "Bash(env)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

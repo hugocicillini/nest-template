@@ -1,0 +1,15 @@
+model FileAsset {
+  id         String    @id @default(uuid())
+  fileName   String
+  mimeType   String
+  size       Int
+  storageKey String    @unique
+  uploadedBy String?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  uploadedByUser User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([uploadedBy])
+  @@map("file_assets")
+}
