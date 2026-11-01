@@ -368,18 +368,22 @@ If that becomes a real need: add a second entry point (e.g. `worker.ts`) that cr
 
 ## CI/CD
 
-Every pull request and push to `main` runs two independent GitHub Actions workflows:
+Every pull request targeting `develop` or `main`, and every push to either
+branch, runs the CI workflow. CodeQL runs on pull requests targeting `main`,
+pushes to `main`, and weekly:
 
 **`ci.yml`** — against a real ephemeral Postgres service container:
 1. Install dependencies
 2. Generate the Prisma client
 3. Lint (`lint:check`, no autofix)
-4. Build
-5. Sync the database schema (`prisma db push`)
-6. Unit tests
-7. E2E tests
+4. Check formatting (`format:check`)
+5. Build
+6. Apply committed migrations (`prisma migrate deploy`)
+7. Unit tests
+8. E2E tests
+9. Docker image build
 
-**`codeql.yml`** — static security analysis of the codebase itself (not dependencies — see [Code quality & conventions](#code-quality--conventions)), also on a weekly schedule independent of any PR.
+**`codeql.yml`** — static security analysis of the codebase itself (not dependencies — see [Code quality & conventions](#code-quality--conventions)) on `main`, also on a weekly schedule independent of any PR.
 
 ---
 

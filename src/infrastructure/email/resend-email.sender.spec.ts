@@ -1,15 +1,6 @@
 import { ResendEmailSender } from './resend-email.sender';
+import { ConfigService } from '@nestjs/config';
 
-/**
- * resend-email.sender.ts builds its Resend client as a module-level
- * constant, not a DI-injected dependency (matches s3-file-storage.ts's
- * pattern for SDK clients). The mock's send() must exist before that
- * constant is constructed - which happens the moment this file's import of
- * ResendEmailSender resolves, before any code below the jest.mock() call
- * runs - so it's created inside the factory itself and exposed via a named
- * export, instead of closing over an outer variable (which would still be
- * undefined at that point).
- */
 jest.mock('resend', () => {
   const mockSend = jest.fn();
   return {
@@ -28,7 +19,12 @@ describe('ResendEmailSender', () => {
 
   beforeEach(() => {
     mockSend.mockReset();
-    sender = new ResendEmailSender();
+    const config = {
+      get: jest.fn((key: string) =>
+        key === 'RESEND_API_KEY' ? 're_test_key' : 'test@example.com',
+      ),
+    } as unknown as ConfigService;
+    sender = new ResendEmailSender(config);
   });
 
   it('resolves when Resend reports no error', async () => {

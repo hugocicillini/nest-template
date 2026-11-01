@@ -2,8 +2,9 @@ name: CI
 
 on:
   pull_request:
+    branches: [develop, main]
   push:
-    branches: [main]
+    branches: [develop, main]
 
 jobs:
   build-and-test:
@@ -28,6 +29,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
       JWT_SECRET: ci-only-secret-not-used-anywhere-else-32-chars-min
       REDIS_URL: redis://localhost:6379
+      CACHE_REDIS_URL: redis://localhost:6380
       NODE_ENV: test
 
     steps:
@@ -45,6 +47,9 @@ jobs:
 
       - name: Lint
         run: npm run lint:check
+
+      - name: Format check
+        run: npm run format:check
 
       - name: Build
         run: npm run build
