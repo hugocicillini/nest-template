@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 # python3/make/g++: fallback in case no prebuilt bcrypt binary matches this
 # platform (bcrypt ships prebuilds for both glibc and musl via
 # `prebuildify --napi --tag-libc`, so this is a safety net, not the common
@@ -18,7 +18,7 @@ RUN npm run build
 # compile pass for bcrypt, unlike a fresh `npm ci --omit=dev` would trigger).
 RUN npm prune --omit=dev
 
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
