@@ -69,17 +69,24 @@ import { UsersModule } from './presentation/users.module';
     // scaled instances must share one counter per client, or each replica
     // enforces the limit independently and the effective limit becomes
     // (configured limit) x (replica count).
-    ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60_000, limit: 100 }],
-      storage: new ThrottlerStorageRedisService({
-        ...parseRedisUrl(process.env.REDIS_URL as string),
-        // parseRedisUrl's maxRetriesPerRequest: null is right for BullMQ
-        // (fine to wait on a queue) but wrong here: ThrottlerGuard runs on
-        // every request, so a Redis outage must fail fast - clients get a
-        // fast 500, recoverable the moment Redis is back - instead of every
-        // request hanging forever waiting on a command that never gives up.
-        maxRetriesPerRequest: 1,
-        connectTimeout: 3_000,
+    ThrottlerModule.forRootAsync({
+      useFactory: () => ({
+        throttlers: [{ ttl: 60_000, limit: 100 }],
+        ...(process.env.NODE_ENV === 'test'
+          ? {}
+          : {
+              storage: new ThrottlerStorageRedisService({
+                ...parseRedisUrl(process.env.REDIS_URL as string),
+                // parseRedisUrl's maxRetriesPerRequest: null is right for
+                // BullMQ (fine to wait on a queue) but wrong here:
+                // ThrottlerGuard runs on every request, so a Redis outage
+                // must fail fast - clients get a fast 500, recoverable the
+                // moment Redis is back - instead of every request hanging
+                // forever waiting on a command that never gives up.
+                maxRetriesPerRequest: 1,
+                connectTimeout: 3_000,
+              }),
+            }),
       }),
     }),
     ScheduleModule.forRoot(),
