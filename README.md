@@ -1,5 +1,7 @@
 # NestJS Auth Template
 
+[English](README.md) | [Português (Brasil)](README.pt-BR.md)
+
 A production-ready **authentication & authorization backend template** built with NestJS, following **Clean Architecture**, **Domain-Driven Design**, and **CQRS** — with the boundaries enforced automatically, not just by convention.
 
 This is not a toy starter. It ships with everything a real backend needs on day one: JWT auth with refresh-token rotation, RBAC, file uploads with content validation, async email/notifications, Redis caching, full observability (errors, tracing, profiling, logs), Docker, CI, and a representative test suite — so new services can be spun up from it instead of rebuilt from scratch.
@@ -258,7 +260,7 @@ See [`.env.example`](.env.example) for the fully annotated version.
 | `npm test` | Unit tests |
 | `npm run test:watch` | Unit tests in watch mode |
 | `npm run test:cov` | Unit tests with coverage |
-| `npm run test:e2e` | End-to-end tests (needs Postgres reachable — Redis is mocked, see below) |
+| `npm run test:e2e` | End-to-end tests (needs Postgres reachable; Redis-backed modules are replaced with fakes, and throttling uses in-memory storage in `NODE_ENV=test`) |
 | `npm run lint` | ESLint with autofix |
 | `npm run lint:check` | ESLint, no autofix — what CI runs |
 | `npm run depcruise` | Verify Clean Architecture layer boundaries |
@@ -328,7 +330,7 @@ Most routes beyond `/auth`'s public ones require a Bearer JWT (obtained from `/a
 The test suite is split by what each tool is actually good at:
 
 - **Unit tests** (co-located `*.spec.ts` files) instantiate the unit under test directly — command/query handlers via `jest-mock-extended` mocks (no DI container, no HTTP, no real infra), plus a few guards/strategies (`RolesGuard`, `PermissionsGuard`, `JwtStrategy`) and infrastructure adapters (`LocalFileStorage`'s path confinement, exercised against the real filesystem) where the logic is auth- or security-critical enough to be worth pinning down. Coverage is *representative*, not exhaustive: a handful of handlers per aggregate that carry real business logic, not all ~31.
-- **E2E tests** (`test/*.e2e-spec.ts`) boot the real `AppModule` via `@nestjs/testing`, with every Redis-backed module (cache, email queue, notification queue) swapped for an in-memory fake via `overrideModule` (not `overrideProvider` — Nest eagerly instantiates every provider in a module, so only swapping the module itself avoids ever touching real Redis). **Postgres stays real**; no Redis instance needs to be reachable at all — `REDIS_URL`/`CACHE_REDIS_URL` only need to be syntactically valid values to satisfy env validation. Supertest fires real HTTP requests at the app; Jest's `expect()` asserts on the results.
+- **E2E tests** (`test/*.e2e-spec.ts`) boot the real `AppModule` via `@nestjs/testing`, with every Redis-backed module (cache, email queue, notification queue) swapped for an in-memory fake via `overrideModule` (not `overrideProvider` — Nest eagerly instantiates every provider in a module, so only swapping the module itself avoids ever touching real Redis). In `NODE_ENV=test`, the throttler also uses Nest's in-memory storage. **Postgres stays real**; Redis is available in CI for the application modules that still require it, while the E2E fakes keep those tests deterministic. Supertest fires real HTTP requests at the app; Jest's `expect()` asserts on the results.
 
 ```bash
 npm test          # unit
@@ -496,8 +498,8 @@ Built on top of the excellent work of the [NestJS](https://nestjs.com/), [Prisma
 
 Found a bug or have a question?
 
-- 🐛 Bugs: open an issue in this repository's tracker
-- 💬 Questions: use this repository's Discussions tab
+- 🐛 Bugs: [open an issue in this repository's tracker](https://github.com/hugocicillini/nest-template/issues)
+- 💬 Questions: [use this repository's Discussions tab](https://github.com/hugocicillini/nest-template/discussions)
 - 📧 Email: [hugo.cicillini@hotmail.com](mailto:hugo.cicillini@hotmail.com)
 
 > Repository not published yet — once it is, link the Issues/Discussions URLs above directly.
