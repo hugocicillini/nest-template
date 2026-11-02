@@ -1,28 +1,28 @@
-import { randomUUID } from 'crypto';
+import { ExpressAdapter } from '@bull-board/express';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { AppCacheModule } from '@infrastructure/_shared/cache.module';
 import { envSchema } from '@infrastructure/_shared/env.schema';
 import { parseRedisUrl } from '@infrastructure/_shared/parse-redis-url';
 import { PrismaModule } from '@infrastructure/_shared/prisma.module';
-import { AppCacheModule } from '@infrastructure/_shared/cache.module';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SentryModule } from '@sentry/nestjs/setup';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { ExpressAdapter } from '@bull-board/express';
+import { randomUUID } from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
-import { HealthModule } from './presentation/health.module';
+import { LoggerModule } from 'nestjs-pino';
+import { AuditLogModule } from './presentation/audit-log.module';
 import { AuthModule } from './presentation/auth.module';
+import { EmailModule } from './presentation/email.module';
+import { FileAssetModule } from './presentation/file-asset.module';
+import { HealthModule } from './presentation/health.module';
+import { NotificationModule } from './presentation/notification.module';
 import { RolesModule } from './presentation/roles.module';
 import { UsersModule } from './presentation/users.module';
-import { AuditLogModule } from './presentation/audit-log.module';
-import { NotificationModule } from './presentation/notification.module';
-import { FileAssetModule } from './presentation/file-asset.module';
-import { EmailModule } from './presentation/email.module';
 
 @Module({
   imports: [
@@ -69,17 +69,24 @@ import { EmailModule } from './presentation/email.module';
     // scaled instances must share one counter per client, or each replica
     // enforces the limit independently and the effective limit becomes
     // (configured limit) x (replica count).
-    ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60_000, limit: 100 }],
-      storage: new ThrottlerStorageRedisService({
-        ...parseRedisUrl(process.env.REDIS_URL as string),
-        // parseRedisUrl's maxRetriesPerRequest: null is right for BullMQ
-        // (fine to wait on a queue) but wrong here: ThrottlerGuard runs on
-        // every request, so a Redis outage must fail fast - clients get a
-        // fast 500, recoverable the moment Redis is back - instead of every
-        // request hanging forever waiting on a command that never gives up.
-        maxRetriesPerRequest: 1,
-        connectTimeout: 3_000,
+    ThrottlerModule.forRootAsync({
+      useFactory: () => ({
+        throttlers: [{ ttl: 60_000, limit: 100 }],
+        ...(process.env.NODE_ENV === 'test'
+          ? {}
+          : {
+              storage: new ThrottlerStorageRedisService({
+                ...parseRedisUrl(process.env.REDIS_URL as string),
+                // parseRedisUrl's maxRetriesPerRequest: null is right for
+                // BullMQ (fine to wait on a queue) but wrong here:
+                // ThrottlerGuard runs on every request, so a Redis outage
+                // must fail fast - clients get a fast 500, recoverable the
+                // moment Redis is back - instead of every request hanging
+                // forever waiting on a command that never gives up.
+                maxRetriesPerRequest: 1,
+                connectTimeout: 3_000,
+              }),
+            }),
       }),
     }),
     ScheduleModule.forRoot(),

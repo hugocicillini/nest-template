@@ -1,5 +1,5 @@
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
-import { Catch, HttpException, HttpStatus } from '@nestjs/common';
+import { Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { ZodValidationException } from 'nestjs-zod';
 import type { Request, Response } from 'express';
@@ -68,6 +68,8 @@ function normalize(exception: HttpException): NormalizedBody {
  */
 @Catch()
 export class UnhandledExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(UnhandledExceptionFilter.name);
+
   @SentryExceptionCaptured()
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
@@ -86,6 +88,10 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
       });
       return;
     }
+
+    this.logger.error(
+      exception instanceof Error ? exception.stack : String(exception),
+    );
 
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
