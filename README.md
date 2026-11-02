@@ -502,8 +502,6 @@ Found a bug or have a question?
 - 💬 Questions: [use this repository's Discussions tab](https://github.com/hugocicillini/nest-template/discussions)
 - 📧 Email: [hugo.cicillini@hotmail.com](mailto:hugo.cicillini@hotmail.com)
 
-> Repository not published yet — once it is, link the Issues/Discussions URLs above directly.
-
 If this project helped you, consider giving it a ⭐ on GitHub!
 
 [⬆ Back to top](#nestjs-auth-template)
