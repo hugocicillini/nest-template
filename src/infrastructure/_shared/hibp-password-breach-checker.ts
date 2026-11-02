@@ -15,6 +15,10 @@ export class HibpPasswordBreachChecker implements IPasswordBreachChecker {
   private readonly logger = new Logger(HibpPasswordBreachChecker.name);
 
   async isBreached(password: string): Promise<boolean> {
+    // HIBP's Pwned Passwords range API requires SHA-1 for k-anonymity.
+    // The full digest is never sent or stored; only its first five characters
+    // are used to query the breach corpus.
+    // codeql[js/insufficient-password-hash]
     const hash = createHash('sha1')
       .update(password)
       .digest('hex')
